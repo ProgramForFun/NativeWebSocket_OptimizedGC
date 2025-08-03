@@ -519,7 +519,12 @@ namespace NativeWebSocket
             return SendMessage(sendBytesQueue, WebSocketMessageType.Binary, new ArraySegment<byte>(bytes));
         }
 
-        public Task SendText(string message)
+		public Task Send(ArraySegment<byte> arraySegment)
+		{
+			return SendMessage(sendBytesQueue, WebSocketMessageType.Binary, arraySegment);
+		}
+
+		public Task SendText(string message)
         {
             var encoded = Encoding.UTF8.GetBytes(message);
 
