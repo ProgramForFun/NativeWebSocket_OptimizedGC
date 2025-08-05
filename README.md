@@ -1,5 +1,8 @@
 <img src="Media/header.png?raw=true" alt="Native WebSocket" />
 
+>[!NOTE]
+>This fork optimized the GC Alloc.
+
 This is the simplest and easiest WebSocket library for Unity you can find!
 
 - No external DLL's required (uses built-in `System.Net.WebSockets`)
