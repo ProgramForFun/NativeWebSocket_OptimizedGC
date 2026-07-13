@@ -394,6 +394,7 @@ namespace NativeWebSocket
     private bool isSending = false;
     private List<ArraySegment<byte>> sendBytesQueue = new List<ArraySegment<byte>>();
     private List<ArraySegment<byte>> sendTextQueue = new List<ArraySegment<byte>>();
+    private MemoryStream _MemoryStream = new MemoryStream();
 
     private bool useDispatchQueue = true;
 
@@ -673,38 +674,33 @@ namespace NativeWebSocket
           ArraySegment<byte> arraySegment = new ArraySegment<byte>(buffer);
           WebSocketReceiveResult result = null;
 
+          _MemoryStream.SetLength(0);
           if (useDispatchQueue)
           {
-            using (var ms = new MemoryStream())
+            do
             {
-              do
+              result = await m_Socket.ReceiveAsync(arraySegment, m_CancellationToken);
+              _MemoryStream.Write(arraySegment.Array, arraySegment.Offset, result.Count);
+            }
+            while (!result.EndOfMessage);
+            _MemoryStream.Seek(0, SeekOrigin.Begin);
+            if (result.MessageType == WebSocketMessageType.Text)
+            {
+              lock (IncomingMessageLock)
               {
-                result = await m_Socket.ReceiveAsync(arraySegment, m_CancellationToken);
-                ms.Write(arraySegment.Array, arraySegment.Offset, result.Count);
+                m_MessageList.Add(_MemoryStream.ToArray());
               }
-              while (!result.EndOfMessage);
-
-              ms.Seek(0, SeekOrigin.Begin);
-
-              if (result.MessageType == WebSocketMessageType.Text)
+              //using (var reader = new StreamReader(_MemoryStream, Encoding.UTF8))
+              //{
+              //	string message = reader.ReadToEnd();
+              //	OnMessage?.Invoke(this, new MessageEventArgs(message));
+              //}
+            }
+            else if (result.MessageType == WebSocketMessageType.Binary)
+            {
+              lock (IncomingMessageLock)
               {
-                lock (IncomingMessageLock)
-                {
-                  m_MessageList.Add(ms.ToArray());
-                }
-
-                //using (var reader = new StreamReader(ms, Encoding.UTF8))
-                //{
-                //	string message = reader.ReadToEnd();
-                //	OnMessage?.Invoke(this, new MessageEventArgs(message));
-                //}
-              }
-              else if (result.MessageType == WebSocketMessageType.Binary)
-              {
-                lock (IncomingMessageLock)
-                {
-                  m_MessageList.Add(ms.ToArray());
-                }
+                m_MessageList.Add(_MemoryStream.ToArray());
               }
             }
           }
@@ -713,11 +709,13 @@ namespace NativeWebSocket
             do
             {
               result = await m_Socket.ReceiveAsync(arraySegment, m_CancellationToken);
+              _MemoryStream.Write(arraySegment.Array, arraySegment.Offset, result.Count);
             }
             while (!result.EndOfMessage);
+            _MemoryStream.Seek(0, SeekOrigin.Begin);
 
             if (result.MessageType != WebSocketMessageType.Close)
-              OnMessageDirectly?.Invoke(arraySegment.Array, 0, result.Count);
+              OnMessageDirectly?.Invoke(_MemoryStream.GetBuffer(), 0, (int)_MemoryStream.Length);
           }
 
           if (result.MessageType == WebSocketMessageType.Close)
