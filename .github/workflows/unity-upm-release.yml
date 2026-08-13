@@ -49,8 +49,8 @@ jobs:
           # Unity-specific files (WebGL platform support)
           cp integrations/Unity/WebSocketWebGL.cs upm-package/WebSocket/
           cp integrations/Unity/WebSocketFactoryWebGL.cs upm-package/WebSocket/
-          cp integrations/Unity/WebSocket.jslib upm-package/WebSocket/
-          cp integrations/Unity/WebSocket.jspre upm-package/WebSocket/
+          cp integrations/Unity/NativeWebSocket.jslib upm-package/WebSocket/
+          cp integrations/Unity/NativeWebSocket.jspre upm-package/WebSocket/
           cp integrations/Unity/colyseus.nativewebsocket.asmdef upm-package/WebSocket/
 
           # Package metadata and samples
@@ -190,8 +190,8 @@ jobs:
         # Unity-specific files
         cp integrations/Unity/WebSocketWebGL.cs upm-package/Assets/WebSocket/
         cp integrations/Unity/WebSocketFactoryWebGL.cs upm-package/Assets/WebSocket/
-        cp integrations/Unity/WebSocket.jslib upm-package/Assets/WebSocket/
-        cp integrations/Unity/WebSocket.jspre upm-package/Assets/WebSocket/
+        cp integrations/Unity/NativeWebSocket.jslib upm-package/Assets/WebSocket/
+        cp integrations/Unity/NativeWebSocket.jspre upm-package/Assets/WebSocket/
         cp integrations/Unity/colyseus.nativewebsocket.asmdef upm-package/Assets/WebSocket/
 
         # Package metadata
